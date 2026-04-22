@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="kab">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tamacahut n Ccac d Wulac</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body {
+  background: #1e1e1e;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Amiri', Georgia, serif;
+  overflow: hidden;
+  gap: 18px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* ─── TOP BAR ─────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+  letter-spacing: 1px;
+  font-family: sans-serif;
+}
+.topbar-title { color: rgba(255,255,255,0.75); font-size: 13px; }
+
+/* ─── STAGE ───────────────────────────────────── */
+.stage {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* ─── ARROW BUTTONS ───────────────────────────── */
+.arr {
+  background: none;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.6);
+  width: 48px; height: 80px;
+  border-radius: 8px;
+  font-size: 30px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.arr:hover:not(:disabled) {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.35);
+  color: white;
+}
+.arr:disabled { opacity: 0.12; cursor: not-allowed; }
+
+/* ─── BOOK WRAPPER (PERSPECTIVE) ──────────────── */
+.book-wrap {
+  perspective: 3000px;
+  position: relative;
+}
+
+/* ─── PAGE-STACK DEPTH ────────────────────────── */
+.stk {
+  position: absolute;
+  z-index: -1;
+}
+/* right-side stack */
+.sr1{right:-2px;top:2px;width:358px;height:494px;background:#e2dad0;border-radius:0 5px 5px 0;}
+.sr2{right:-4px;top:4px;width:358px;height:494px;background:#d5ccc2;border-radius:0 5px 5px 0;}
+.sr3{right:-6px;top:6px;width:358px;height:494px;background:#c9c0b5;border-radius:0 5px 5px 0;}
+/* left-side stack */
+.sl1{left:-2px;top:2px;width:358px;height:494px;background:#e2dad0;border-radius:5px 0 0 5px;}
+.sl2{left:-4px;top:4px;width:358px;height:494px;background:#d5ccc2;border-radius:5px 0 0 5px;}
+.sl3{left:-6px;top:6px;width:358px;height:494px;background:#c9c0b5;border-radius:5px 0 0 5px;}
+
+/* ─── THE BOOK ─────────────────────────────────── */
+.book {
+  position: relative;
+  width: 728px; /* 356 + 16 + 356 */
+  height: 494px;
+  transform-style: preserve-3d;
+}
+
+/* ─── PAGES ────────────────────────────────────── */
+.pl, .pr {
+  position: absolute;
+  top: 0;
+  width: 356px;
+  height: 494px;
+  overflow: hidden;
+  background: #fdfaf4;
+}
+.pl {
+  left: 0;
+  border-radius: 6px 0 0 6px;
+  box-shadow: inset -6px 0 18px rgba(0,0,0,0.1), 3px 0 5px rgba(0,0,0,0.2);
+}
+.pr {
+  right: 0;
+  border-radius: 0 6px 6px 0;
+  box-shadow: inset 6px 0 18px rgba(0,0,0,0.1);
+}
+/* Spine shading overlays */
+.pl::after {
+  content:''; position:absolute; top:0; right:0;
+  width:32px; height:100%;
+  background:linear-gradient(to left,rgba(0,0,0,0.11),transparent);
+  pointer-events:none; z-index:2;
+}
+.pr::before {
+  content:''; position:absolute; top:0; left:0;
+  width:32px; height:100%;
+  background:linear-gradient(to right,rgba(0,0,0,0.11),transparent);
+  pointer-events:none; z-index:2;
+}
+
+/* ─── SPINE ─────────────────────────────────────── */
+.spine {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px; height: 494px;
+  background: linear-gradient(to right,#3a2210 0%,#7a5030 22%,#c4986a 50%,#7a5030 78%,#3a2210 100%);
+  z-index: 6;
+  box-shadow: 0 0 12px rgba(0,0,0,0.35);
+}
+
+/* ─── FLIP ELEMENT ───────────────────────────────── */
+.flip {
+  position: absolute; top: 0;
+  width: 356px; height: 494px;
+  transform-style: preserve-3d;
+  z-index: 10;
+  pointer-events: none;
+}
+.flip.fright { right:0; transform-origin: left center; }
+.flip.fleft  { left:0;  transform-origin: right center; }
+.flip.go { transition: transform 0.88s cubic-bezier(0.55,0,0.45,1); }
+
+.ff, .fb {
+  position: absolute;
+  width: 356px; height: 494px;
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+.fb { transform: rotateY(180deg); }
+
+/* curl shadow on flip edge */
+.flip.fright .ff::after {
+  content:''; position:absolute; left:0; top:0;
+  width:24px; height:100%;
+  background:linear-gradient(to right,rgba(0,0,0,0.18),transparent);
+  pointer-events:none; z-index:3;
+}
+.flip.fleft .ff::after {
+  content:''; position:absolute; right:0; top:0;
+  width:24px; height:100%;
+  background:linear-gradient(to left,rgba(0,0,0,0.18),transparent);
+  pointer-events:none; z-index:3;
+}
+
+/* ─── DROP SHADOW ─────────────────────────────────── */
+.book-shadow {
+  position:absolute; bottom:-22px; left:50%;
+  transform:translateX(-50%);
+  width:710px; height:28px;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,0.55) 0%,transparent 68%);
+  pointer-events:none; z-index:-2;
+}
+
+/* ─── BOTTOM BAR ──────────────────────────────────── */
+.botbar {
+  display:flex; align-items:center; gap:20px;
+  color:rgba(255,255,255,0.4); font-family:sans-serif; font-size:11px; letter-spacing:0.5px;
+}
+.dots { display:flex; gap:5px; }
+.dot {
+  width:7px; height:7px; border-radius:50%;
+  background:rgba(255,255,255,0.18); cursor:pointer;
+  transition:background 0.2s, transform 0.2s;
+}
+.dot.on { background:rgba(255,255,255,0.7); transform:scale(1.2); }
+
+
+/* ═══════════════════════════════════════════════════
+   PAGE INNER STYLES
+═══════════════════════════════════════════════════ */
+
+.pg {
+  width:356px; height:494px;
+  background:
+    radial-gradient(ellipse at top left, rgba(193,82,42,0.05), transparent 60%),
+    radial-gradient(ellipse at bottom right, rgba(160,120,64,0.06), transparent 60%),
+    #fdfaf4;
+  display:flex; flex-direction:column;
+  position:relative; overflow:hidden;
+}
+
+/* COVER */
+.pg.cov {
+  background: linear-gradient(150deg,#c1522a 0%,#7a2a10 40%,#1e0e04 100%);
+  align-items:center; justify-content:center; gap:0;
+}
+.cov-inner {
+  position:absolute; inset:12px;
+  border:1.5px solid rgba(232,169,48,0.4);
+  border-radius:3px;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:space-between;
+  padding:20px 18px 18px;
+  overflow:hidden;
+}
+.cov-orn { color:#e8a930; font-size:16px; letter-spacing:6px; opacity:.7; }
+.cov-h1 {
+  font-family:'Scheherazade New',serif;
+  font-size:26px; color:#f5d86e;
+  text-align:center; line-height:1.35;
+  text-shadow:0 2px 10px rgba(0,0,0,0.5);
+}
+.cov-sub { font-size:12px; color:rgba(245,234,216,0.55); letter-spacing:2px; margin-top:4px; }
+.cov-foot { font-size:10px; color:rgba(232,169,48,0.5); letter-spacing:3px; text-transform:uppercase; }
+
+/* BACK COVER */
+.pg.back {
+  background:linear-gradient(30deg,#c1522a 0%,#7a2a10 40%,#1e0e04 100%);
+  align-items:center; justify-content:center;
+}
+
+/* STORY PAGES */
+.pg-hdr {
+  height:22px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 14px;
+  background:linear-gradient(to bottom,#ede5cf,transparent);
+}
+.pg-num { font-size:9px; color:#c1522a; letter-spacing:1px; font-family:sans-serif; }
+.pg-tag { font-size:9px; color:#a07840; letter-spacing:1px; font-family:sans-serif; }
+
+.pg-illus {
+  height:210px; flex-shrink:0; overflow:hidden;
+  border-bottom:1px solid rgba(193,82,42,0.18);
+  box-shadow: inset 0 -8px 16px -10px rgba(60,30,10,0.25);
+}
+.pg-illus svg, .pg-illus img { width:100%; height:100%; display:block; object-fit:cover; }
+
+.pg-div {
+  height:1px; flex-shrink:0; margin:7px 16px;
+  background:linear-gradient(to right,transparent,#d4882e 30%,#d4882e 70%,transparent);
+}
+
+.pg-ch {
+  font-family:'Scheherazade New',serif;
+  font-size:15px; color:#8b3318;
+  text-align:center; padding:0 14px 4px;
+  flex-shrink:0; line-height:1.3;
+}
+
+.pg-body {
+  flex:1; padding:2px 14px 10px;
+  font-size:11.5px; line-height:1.78; color:#2c2416;
+  overflow:hidden;
+}
+.pg-body p { margin-bottom:2px; }
+.d { color:#8b3318; font-style:italic; font-weight:700; }
+.les {
+  background:rgba(193,82,42,0.07);
+  border-left:2.5px solid #d4882e;
+  padding:5px 9px; margin-top:7px;
+  font-style:italic; font-size:11px; color:#6b4020;
+  line-height:1.6;
+}
+
+/* COLOPHON PAGE */
+.pg.colo {
+  background:#fdfaf4;
+  align-items:center; justify-content:center; gap:18px;
+  text-align:center;
+}
+.colo-text {
+  font-family:'Scheherazade New',serif;
+  font-size:16px; color:#8b3318; line-height:2;
+  padding:0 28px;
+}
+.colo-orn { font-size:22px; color:#d4882e; opacity:.6; letter-spacing:8px; }
+
+/* BLANK LEFT (first spread) */
+.pg.blank { background:#f5f0e8; }
+
+/* AUTHOR LINE ON COVER */
+.cov-author {
+  font-size: 11px;
+  color: rgba(232,169,48,0.8);
+  letter-spacing: 2px;
+  margin-top: 6px;
+  font-family: sans-serif;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════
+   MOBILE VIEW  (≤ 768 px)
+═══════════════════════════════════════════════════ */
+
+/* ─ Mobile wrapper ─ */
+#mv {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 100dvh;
+  padding: 14px 0 24px;
+  gap: 12px;
+  background: #1e1e1e;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ─ Mobile header ─ */
+.mv-hdr {
+  text-align: center;
+  padding: 0 16px;
+}
+.mv-hdr-title {
+  font-family: 'Scheherazade New', serif;
+  font-size: 17px;
+  color: #f5d86e;
+  line-height: 1.3;
+}
+.mv-hdr-author {
+  font-family: sans-serif;
+  font-size: 10px;
+  color: rgba(232,169,48,0.7);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+.mv-hdr-label {
+  font-family: sans-serif;
+  font-size: 10px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+/* ─ Mobile page display ─ */
+.mv-stage {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+}
+.mv-page-wrap {
+  /* width/height set by JS */
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
+}
+#mvp {
+  transform-origin: top left;
+  transition: opacity 0.22s ease;
+}
+
+/* ─ Mobile nav ─ */
+.mv-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+}
+.mv-arr {
+  background: rgba(255,255,255,0.07);
+  border: 1.5px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.75);
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  font-size: 28px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.mv-arr:active:not(:disabled) {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  transform: scale(0.94);
+}
+.mv-arr:disabled { opacity: 0.12; }
+
+.mv-dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+  max-width: 220px;
+}
+.mv-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mv-dot.on {
+  background: #e8a930;
+  transform: scale(1.35);
+}
+
+/* ─ Mobile page counter ─ */
+.mv-pi {
+  font-family: sans-serif;
+  font-size: 11px;
+  color: rgba(255,255,255,0.32);
+  letter-spacing: 1px;
+}
+
+/* ─ Swipe hint (shown briefly on first load) ─ */
+.mv-swipe-hint {
+  font-family: sans-serif;
+  font-size: 10px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 1px;
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow: hidden;
+    justify-content: flex-start;
+    padding: 0;
+    gap: 0;
+  }
+  .topbar, .stage, .botbar { display: none !important; }
+  #mv { display: flex; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">Tamacahut n Ccac d Wulac</span>
+  <span>·</span>
+  <span style="color:rgba(232,169,48,0.65);font-size:11px;letter-spacing:1.5px;font-family:sans-serif;">sɣuṛ Boussad TAMAZIRT</span>
+  <span>·</span>
+  <span id="ti">Asentel</span>
+</div>
+
+<div class="stage">
+  <button class="arr" id="bp" disabled>&#8249;</button>
+
+  <div class="book-wrap">
+    <!-- depth layers -->
+    <div class="stk sl3"></div><div class="stk sl2"></div><div class="stk sl1"></div>
+    <div class="stk sr3"></div><div class="stk sr2"></div><div class="stk sr1"></div>
+
+    <div class="book" id="bk">
+      <div class="pl" id="pl"></div>
+      <div class="spine"></div>
+      <div class="pr" id="pr"></div>
+      <!-- flip element -->
+      <div class="flip" id="fl">
+        <div class="ff" id="ff"></div>
+        <div class="fb" id="fb"></div>
+      </div>
+    </div>
+    <div class="book-shadow"></div>
+  </div>
+
+  <button class="arr" id="bn">&#8250;</button>
+</div>
+
+<div class="botbar">
+  <div class="dots" id="dots"></div>
+  <span id="pi">1 / 8</span>
+</div>
+
+<!-- ═══════════ MOBILE VIEW ═══════════ -->
+<div id="mv">
+  <div class="mv-hdr">
+    <div class="mv-hdr-title">Tamacahut n Ccac d Wulac</div>
+    <div class="mv-hdr-author">sɣuṛ Boussad TAMAZIRT</div>
+    <div class="mv-hdr-label" id="mv-lbl">Couverture</div>
+  </div>
+  <div class="mv-stage">
+    <div class="mv-page-wrap" id="mvpw">
+      <div id="mvp"></div>
+    </div>
+  </div>
+  <div class="mv-nav">
+    <button class="mv-arr" id="mvbp" disabled>&#8249;</button>
+    <div class="mv-dots" id="mvdots"></div>
+    <button class="mv-arr" id="mvbn">&#8250;</button>
+  </div>
+  <div class="mv-pi" id="mvpi">1 / 15</div>
+  <div class="mv-swipe-hint">← Glisser pour tourner →</div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+//  SVG ILLUSTRATIONS
+// ════════════════════════════════════════════════════
+
+const SVG = {
+  brothers_night: '<img src="illustrations/01_brothers_night.jpg" alt="">',
+  calling:        '<img src="illustrations/02_calling.jpg" alt="">',
+  hunter:         '<img src="illustrations/03_hunter.jpg" alt="">',
+  funeral:        '<img src="illustrations/04_funeral.jpg" alt="">',
+  happyman:       '<img src="illustrations/05_happyman.jpg" alt="">',
+  boar:           '<img src="illustrations/06_boar.jpg" alt="">',
+  shepherd:       '<img src="illustrations/07_shepherd.jpg" alt="">',
+  stomach:        '<img src="illustrations/08_stomach.jpg" alt="">',
+  farmer:         '<img src="illustrations/09_farmer.jpg" alt="">',
+  cryingman:      '<img src="illustrations/10_cryingman.jpg" alt="">',
+  oliveman:       '<img src="illustrations/11_oliveman.jpg" alt="">',
+  reunion:        '<img src="illustrations/12_reunion.jpg" alt="">'
+};
+
+// ════════════════════════════════════════════════════
+//  PAGE BUILDER
+// ════════════════════════════════════════════════════
+
+function pgStory(num, tag, title, svgKey, bodyHtml) {
+  const isLeft = num % 2 !== 0;
+  return `<div class="pg">
+    <div class="pg-hdr">
+      <span class="pg-num">${isLeft ? num : ''}</span>
+      <span class="pg-tag">${isLeft ? '' : tag}</span>
+      <span class="pg-num">${isLeft ? '' : num}</span>
+    </div>
+    <div class="pg-illus">${SVG[svgKey]||''}</div>
+    <div class="pg-div"></div>
+    <div class="pg-ch">${title}</div>
+    <div class="pg-body">${bodyHtml}</div>
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════
+//  ALL PAGE HTML STRINGS
+// ════════════════════════════════════════════════════
+
+const P = {
+
+cover: `<div class="pg cov">
+  <div class="cov-inner">
+    <div class="cov-orn">⬡ ✦ ⬡ ✦ ⬡</div>
+    <img src="illustrations/01_brothers_night.jpg" alt="" style="width:240px;height:160px;object-fit:cover;border-radius:4px;border:2px solid rgba(232,169,48,0.55);box-shadow:0 6px 22px rgba(0,0,0,0.5);">
+    <div style="text-align:center;">
+      <div class="cov-h1">Tamacahut n Ccac d Wulac</div>
+      <div class="cov-sub">ⵜⴰⵎⴰⵛⴰⵀⵓⵜ ⵏ ⵛⵛⴰⵛ ⴷ ⵡⵓⵍⴰⵛ</div>
+      <div class="cov-author">sɣuṛ Boussad TAMAZIRT</div>
+    </div>
+    <div class="cov-orn" style="font-size:14px;">✦ ⬡ ✦ ⬡ ✦</div>
+    <div class="cov-foot"> Idles n Yeqbayliyen</div>
+  </div>
+</div>`,
+
+blank: `<div class="pg blank" style="display:flex;align-items:center;justify-content:center;">
+  <svg viewBox="0 0 200 200" width="200" height="200" opacity=".08">
+    <path d="M100 20 L118 74 L176 74 L128 108 L147 162 L100 128 L53 162 L72 108 L24 74 L82 74 Z" fill="#8b3318"/>
+    <circle cx="100" cy="100" r="85" fill="none" stroke="#8b3318" stroke-width="1"/>
+    <circle cx="100" cy="100" r="70" fill="none" stroke="#8b3318" stroke-width="0.5"/>
+  </svg>
+</div>`,
+
+p1: pgStory(1, 'Tazwara', 'Sin watmaten ad d-ṣeyyeden',
+  'brothers_night',
+  `<p>Sin watmaten fɣen ad d-ṣeyyeden : yiwen isem-is <strong>Ccac</strong>, wayeḍ <strong>Ulac</strong>.</p>
+   <p>Nudan, nudan akken jmiɛ, ur ufin iqqiḥ. Ihi, msefhamen ad mfaraqen akken ad nadin deg yimukan yemxallafen ; ahat ad yennerni ṭṭmeɛ ad d-afen ka.</p>
+   <p>Iɛedda lweqt, kif-kif. Teqquṛ, ulac d acu i yufan. Mkul wa yuyes, dɣa uɣalen wa yettnadi ɣef wayeḍ.</p>`),
+
+p2: pgStory(2, 'Yal wa yessawal', 'Waaa ! Ccaaaac !… Waaa ! Ulaaac !…',
+  'calling',
+  `<p>Yal wa yessawal i gma-s :</p>
+   <p class="d">— Waaa ! Ccaaaac !… (i d-yeqqaṛ Ulac).</p>
+   <p class="d">— Waaa ! Ulaaac !… (i d-yeqqaṛ Ccac).</p>
+   <p>Yiwen ur yesli i wayeḍ, ttkemmilen ttiẓẓifen am akken :</p>
+   <p class="d">— Waaa ! Ccaaaac !…</p>
+   <p class="d">— Waaa ! Ulaaac !…</p>`),
+
+p3: pgStory(3, 'Amezwaru', 'Ccac d useyyad',
+  'hunter',
+  `<p>Meskin Ccac yemlal-d yiwen useyyad, yeggul deg-s. Yaṭṭef-it, yewwet-it... Ccac yettru, yenna-y-as :</p>
+   <p class="d">— Iwacu d iyi-tewteḍ ?</p>
+   <p>Yerra-as useyyad :</p>
+   <p class="d">— Amek !!! Seg sbeḥ nekk ad ttṣeyyideɣ, keččini ad d-teqqareḍ : « Ulac, ulac !!! »</p>
+   <p class="d">— Ihi, amek yilaq ad d-iniɣ ?</p>
+   <p class="d">— Ini-d : « Seṭṭac, sbaɛṭac… » i yal tikkelt.</p>
+   <div class="les">✦ Qal tura Ccac : <strong>« Seṭṭac, sbaɛṭac… »</strong></div>`),
+
+p4: pgStory(4, 'Wis sin', 'Ccac d lǧanaza',
+  'funeral',
+  `<p>Meskin Ccac ikemmel abrid-is, iqqaṛ « seṭṭac, sbaɛṭac », yettɛeyyiḍ ahat ad d-yeɛqel gma-s ṣṣut-is. Imugger-d agraw n lǧanaza ala teddun ɣer temḍelt, nɛac ɣef tuyat-nsen. Imawlan n umarḥum iɣaḍ-iten lḥal, nnan-as :</p>
+   <p class="d">— Ṛǧu ad ak-nemmel leḥsab !</p>
+   <p>Ggerzen-as tiɣṛit. Ccac, akken yettru, yanna-asen :</p>
+   <p class="d">— Ayen akka d iyi-tewtem ? — Amek !!! Nukkni nassɛa lǧanaza, keččini ala teqqareḍ : « Seṭṭac, sbaɛṭac !!!! »</p>
+   <p class="d">— Ihi, amek yilaq ad d-iniɣ ? — Qqaṛ : « Lbaṛaka di lɛamuṛ-nwen… »</p>
+   <div class="les">✦ Qal tura Ccac : <strong>« Lbaṛaka di lɛamuṛ-nwen… »</strong></div>`),
+
+p5: pgStory(5, 'Wis kraḍ', 'Ccac d urgaz ifeṛḥen',
+  'happyman',
+  `<p>Meskin Ccac ikemmel abrid-is, iqqaṛ « lbaṛaka di lɛamuṛ-nwen », yettɛeyyiḍ ahat ad d-yeɛqel gma-s ṣṣut-is ma yesla-as-d. Imugger-d yiwen urggaz kan akken terna ɣur-s teqcict. Iɣil yid-s i d-yedha ; yerfa, dɣa yefka-as ṭriḥa din din. Ccac, yettru, yenna-y-as :</p>
+   <p class="d">— Iwacu d iyi-tewteḍ ?</p>
+   <p class="d">— Amek ! Nekk tameṭṭut-iw terba-d, kečč ad d-qqareḍ : « Labaraka di lɛamuṛ-nwen !!! »</p>
+   <p class="d">— Ihi, amek yilaq ad d-iniɣ ? — Ini-d : « D aseɛdi d ameṛbuḥ. »</p>
+   <div class="les">✦ Qal tura Ccac : <strong>« D aseɛdi d ameṛbuḥ. »</strong></div>`),
+
+p6: pgStory(6, 'Wis kuẓ', 'Ccac d uterras',
+  'boar',
+  `<p>Meskin Ccac ikemmel abrid-is, yeqqaṛ « d aseɛdi d ameṛbuḥ »… Ha ta, yemlal-d yiwen uterras ; kan akken t-ifeggel yilef, iɛfes-as aḍar-is. Mi d-as yesla ad yeqqaṛ « d aseɛdi d amerbuḥ », yerra urfan fell-as, yettenkar-as almi yettfuḥu. Ccac, yettru, yenna-y-as :</p>
+   <p class="d">— Iwacu d iyi-tewteḍ ? — Amek !!! Nekk ifeggel-iyi yilef, kečč ala teqqareḍ : « D aseɛdi d ameṛbuḥ !!! »</p>
+   <p class="d">— Ihi, amek yilaq ad d-iniɣ ? — Ini-d : « Ad k-yenju Ṛebbi yenju-aɣ. »</p>
+   <div class="les">✦ Qal tura Ccac : <strong>« Ad k-yenju Ṛebbi yenju-aɣ. »</strong></div>`),
+
+p7: pgStory(7, 'Wis semmus', 'Ccac d umeksa',
+  'shepherd',
+  `<p>Meskin Ccac ikemmel abrid-is, iqqaṛ « ad k-yenju Ṛebbi yenju-aɣ ». Yemlal-d ameksa, tafunast-is kan akken d-urew agenduz. Iɣil deg-s i d-yelti s wawal-nni, dɣa yewwet-it. Ccac, yettru, yenna-y-as :</p>
+   <p class="d">— Ayɣeṛ akka iyi-tewteḍ ? — Amek !!! Nekk turew-iyi-d tfunast agendduz, kečč ala d-teqqareḍ : « Ad k-yenju Ṛebbi yenju-aɣ ! »</p>
+   <p class="d">— Ihi, amek yilaq ad d-iniɣ ? — Ini-d : « Ad t-kker d isengayen d inebggayen, ad neskkef, ad sekkfen medden. »</p>
+   <div class="les">✦ Qal tura Ccac : <strong>« Ad t-kker d isengayen d inebggayen… »</strong></div>`),
+
+p8: pgStory(8, 'Wis setta', 'Ccac d urgaz bu siq',
+  'stomach',
+  `<p>Meskin Ccac ikemmel abrid-is, iqqaṛ « ad t-kker d isengayen d inebggayen ». Yemlal-d yiwen, yeṭṭef-it bu siq ; tserreḥ tɛebbuḍt-is yerna tqeṛḥ-it. Iɣil deg-s a yettihi, dɣa si ddemmaṛ-nni yefka-as amur-is n tyita. Ccac, yettru, yenna-y-as :</p>
+   <p class="d">— Ayen akka iyi-tewteḍ ? — Amek !!! Nekk tekker-iyi tɛebbuḍt-iw, kečč a teqqareḍ : « Ad t-kker d isengayen d inebggayen ! »</p>
+   <p class="d">— Ihi, amek yilaq ad d-iniɣ ? — Ini-d : « Anda ten-tegreḍ ad qqaṛen. »</p>
+   <div class="les">✦ Qal tura Ccac : <strong>« Anda ten-tegreḍ ad qqaṛen. »</strong></div>`),
+
+p9: pgStory(9, 'Wis sebɛa', 'Ccac d ufellaḥ',
+  'farmer',
+  `<p>Ccac ikemmel abrid-is iteddu, yeqqaṛ « anda ten-tegreḍ ad qqaṛen ». Yemlal-d afellah iteẓẓu ibawen. Yefqaɛ ufellah-nni mi d-as yesla akken, yessečča-as tiɣrit. Ccac, yettru, yenna-y-as :</p>
+   <p class="d">— Iwacu d iyi-tewteḍ ? — Amek !!! Nekk ala teẓẓuɣ ibawen, kečč ala teqqareḍ : « Anda ten-tegreḍ ad qqaṛen ! »</p>
+   <p class="d">— Ihi, amek yilaq ad d-iniɣ ? — Ini-d : « Ad htutin, ad btutin, ad gen ticulliḍin. »</p>
+   <div class="les">✦ Qal tura Ccac : <strong>« Ad htutin, ad btutin, ad gen ticulliḍin. »</strong></div>`),
+
+p10: pgStory(10, 'Wis tamant', 'Ccac d urgaz yemmundlen',
+  'cryingman',
+  `<p>Ccac ikemmel abrid-is iteddu, yeqqaṛ « ad htutin, ad btutin, ad gen ticulliḍin »… Yufa-d deg ubrid-is yiwen yemmundel, a ttrunt wallen-is almi tqeṛḥent. Yedda fell-as, ihetek-it. Ccac, yettru, yenna-y-as :</p>
+   <p class="d">— Acimi d iyi-tewteḍ ? — Amek !!! Allen-iw nɣant-iyi almi uɣalent d aṛquqen seg yimeṭṭawen, kečč ala teqqareḍ : « Ad htutin, ad btutin, ad gen ticulliḍin ! »</p>
+   <p class="d">— Ihi, amek yilaq ad d-iniɣ ? — Ini-d : « Ad kkawent, ad kkawent. »</p>
+   <div class="les">✦ Qal tura Ccac : <strong>« Ad kkawent, ad kkawent. »</strong></div>`),
+
+p11: pgStory(11, 'Wis tẓa', 'Ccac d urgaz iɛebban',
+  'oliveman',
+  `<p>Ccac yuɣal iteddu, yeqqaṛ « ad kkawent, ad kkawent ». Yemlal-d yiwen iɛebba-d tacekkaṛt uzemmur di tsawent. Ysser-s tacekkaṛt-nni, yerra ɛeyyu-nni fell-as, yekkat-it almi izehher. Ccac, yettru, yenna-y-as :</p>
+   <p class="d">— Iwacu d iyi-tewteḍ ? — Amek !!! Nekk tesnegf-iyi tsawent-ayi s ttɛebga, kečč ola yi tdeɛɛuḍ : « Ad kkawent tgecrar-iw ! »</p>
+   <p class="d">— Ihi, amek yilaq ad d-iniɣ ? — Ini-d : « Ṛebbi ad iɛin, Ṛebbi ad iɛin. »</p>
+   <div class="les">✦ Qal tura Ccac : <strong>« Ṛebbi ad iɛin, Ṛebbi ad iɛin. »</strong></div>`),
+
+p12: pgStory(12, 'Tameggarut', 'Axxam !',
+  'reunion',
+  `<p>Ccac yuɣal iteddu, yeqqaṛ « Ṛebbi ad iɛin, Ṛebbi ad iɛin ». Yiwen ur t-id inuja. Almi d as-d-yesla <strong>gma-s</strong>, ferḥen imi d mlalen, ttun ṣyada-nni, ṭṭfen-d abrid s <strong>axxam</strong>. Ccac yules-as-d i Wulac d acu yakk i d-as-yeḍran deg ubrid.</p>`),
+
+p13: `<div class="pg colo">
+  <div class="colo-orn">⬡ ✦ ⬡</div>
+  <div class="colo-text">
+    Tamacahut-iw lwad lwad,<br>
+    ḥkiɣ-tt-id i warraw n leǧwad ;<br><br>
+    cciṭan ad t-yexzu Ṛebbi,<br>
+    win tt-id yeǧǧan<br>
+    ad as-yeɛfu Ṛebbi.
+  </div>
+  <div class="colo-orn">⬡ ✦ ⬡</div>
+  <div style="font-size:11px;color:#a07840;letter-spacing:2px;font-family:sans-serif;">ⵜⴰⵎⴰⵣⵉⵖⵜ</div>
+</div>`,
+
+backcover: `<div class="pg back" style="display:flex;align-items:center;justify-content:center;">
+  <div style="text-align:center;padding:20px;">
+    <svg viewBox="0 0 120 120" width="120" height="120" opacity=".5">
+      <polygon points="60,8 72,42 108,42 80,62 92,96 60,76 28,96 40,62 12,42 48,42" fill="#f5d86e" stroke="#e8a930" stroke-width="1"/>
+    </svg>
+    <div style="color:rgba(232,169,48,0.5);font-size:11px;letter-spacing:3px;margin-top:16px;font-family:sans-serif;">TAMACAHUT</div>
+  </div>
+</div>`
+
+};
+
+// ════════════════════════════════════════════════════
+//  SPREADS
+// ════════════════════════════════════════════════════
+
+const SPREADS = [
+  { l: P.blank,     r: P.cover,  label: 'Asentel' },
+  { l: P.p1,        r: P.p2,     label: 'Tazwara — Iɣ. 1-2' },
+  { l: P.p3,        r: P.p4,     label: 'Useyyad · Lǧanaza — Iɣ. 3-4' },
+  { l: P.p5,        r: P.p6,     label: 'Urgaz ifeṛḥen · Uterras — Iɣ. 5-6' },
+  { l: P.p7,        r: P.p8,     label: 'Umeksa · Urgaz bu siq — Iɣ. 7-8' },
+  { l: P.p9,        r: P.p10,    label: 'Ufellaḥ · Urgaz yemmundlen — Iɣ. 9-10' },
+  { l: P.p11,       r: P.p12,    label: 'Urgaz iɛebban · Axxam — Iɣ. 11-12' },
+  { l: P.p13,       r: P.backcover, label: 'Tameggarut' },
+];
+
+// ════════════════════════════════════════════════════
+//  FLIP ENGINE
+// ════════════════════════════════════════════════════
+
+let cur = 0;
+let busy = false;
+
+const elPL   = document.getElementById('pl');
+const elPR   = document.getElementById('pr');
+const elFlip = document.getElementById('fl');
+const elFF   = document.getElementById('ff');
+const elFB   = document.getElementById('fb');
+const elBP   = document.getElementById('bp');
+const elBN   = document.getElementById('bn');
+const elPI   = document.getElementById('pi');
+const elTI   = document.getElementById('ti');
+const elDots = document.getElementById('dots');
+
+// Build dots
+SPREADS.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i===0 ? ' on' : '');
+  d.title = SPREADS[i].label;
+  d.onclick = () => jumpTo(i);
+  elDots.appendChild(d);
+});
+
+function setDots(n) {
+  elDots.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===n));
+}
+
+function updateUI() {
+  elBP.disabled = cur === 0;
+  elBN.disabled = cur === SPREADS.length - 1;
+  elPI.textContent = `${cur + 1} / ${SPREADS.length}`;
+  elTI.textContent = SPREADS[cur].label;
+  setDots(cur);
+}
+
+function renderStatic() {
+  elPL.innerHTML = SPREADS[cur].l;
+  elPR.innerHTML = SPREADS[cur].r;
+  elFlip.style.display = 'none';
+}
+
+function flipForward() {
+  if (busy || cur >= SPREADS.length - 1) return;
+  busy = true;
+  const next = cur + 1;
+
+  // Pre-load next right under the flip
+  elPR.innerHTML = SPREADS[next].r;
+
+  // Set up flip element on RIGHT half
+  elFF.innerHTML = SPREADS[cur].r;     // front = current right page
+  elFB.innerHTML = SPREADS[next].l;    // back  = next left page
+
+  elFlip.style.display = 'block';
+  elFlip.className = 'flip fright';
+  elFlip.style.transform = 'rotateY(0deg)';
+  elFF.style.borderRadius = '0 6px 6px 0';
+  elFB.style.borderRadius = '6px 0 0 6px';
+
+  // Trigger
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      elFlip.classList.add('go');
+      elFlip.style.transform = 'rotateY(-180deg)';
+    });
+  });
+
+  elFlip.addEventListener('transitionend', function handler() {
+    elFlip.removeEventListener('transitionend', handler);
+    cur = next;
+    elPL.innerHTML = SPREADS[cur].l;
+    elPR.innerHTML = SPREADS[cur].r;
+    elFlip.style.display = 'none';
+    elFlip.classList.remove('go');
+    elFlip.style.transform = 'rotateY(0deg)';
+    busy = false;
+    updateUI();
+  });
+
+  updateUI();
+}
+
+function flipBackward() {
+  if (busy || cur <= 0) return;
+  busy = true;
+  const prev = cur - 1;
+
+  // Pre-load prev left
+  elPL.innerHTML = SPREADS[prev].l;
+
+  // Set up flip element on LEFT half
+  elFF.innerHTML = SPREADS[cur].l;     // front = current left page
+  elFB.innerHTML = SPREADS[prev].r;    // back  = prev right page
+
+  elFlip.style.display = 'block';
+  elFlip.className = 'flip fleft';
+  elFlip.style.transform = 'rotateY(0deg)';
+  elFF.style.borderRadius = '6px 0 0 6px';
+  elFB.style.borderRadius = '0 6px 6px 0';
+
+  // Pre-load prev right so it shows under when flip reaches right side
+  // We'll swap after animation
+  elPR.innerHTML = SPREADS[prev].r;
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      elFlip.classList.add('go');
+      elFlip.style.transform = 'rotateY(180deg)';
+    });
+  });
+
+  elFlip.addEventListener('transitionend', function handler() {
+    elFlip.removeEventListener('transitionend', handler);
+    cur = prev;
+    elPL.innerHTML = SPREADS[cur].l;
+    elPR.innerHTML = SPREADS[cur].r;
+    elFlip.style.display = 'none';
+    elFlip.classList.remove('go');
+    elFlip.style.transform = 'rotateY(0deg)';
+    busy = false;
+    updateUI();
+  });
+
+  updateUI();
+}
+
+function jumpTo(n) {
+  if (busy || n === cur) return;
+  cur = n;
+  renderStatic();
+  updateUI();
+}
+
+elBN.addEventListener('click', flipForward);
+elBP.addEventListener('click', flipBackward);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') flipForward();
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   flipBackward();
+});
+
+// Init
+renderStatic();
+updateUI();
+
+// ════════════════════════════════════════════════════
+//  MOBILE ENGINE
+// ════════════════════════════════════════════════════
+
+const PAGES = [
+  { html: P.cover,     label: 'Couverture' },
+  { html: P.p1,        label: 'Page 1 — Sin watmaten' },
+  { html: P.p2,        label: 'Page 2 — Waaa ! Ccaaaac !' },
+  { html: P.p3,        label: 'Page 3 — Ccac d useyyad' },
+  { html: P.p4,        label: 'Page 4 — Ccac d lǧanaza' },
+  { html: P.p5,        label: 'Page 5 — Urgaz ifeṛḥen' },
+  { html: P.p6,        label: 'Page 6 — Ccac d uterras' },
+  { html: P.p7,        label: 'Page 7 — Ccac d umeksa' },
+  { html: P.p8,        label: 'Page 8 — Urgaz bu siq' },
+  { html: P.p9,        label: 'Page 9 — Ccac d ufellaḥ' },
+  { html: P.p10,       label: 'Page 10 — Urgaz yemmundlen' },
+  { html: P.p11,       label: 'Page 11 — Urgaz iɛebban' },
+  { html: P.p12,       label: 'Page 12 — Axxam !' },
+  { html: P.p13,       label: 'Tameggarut' },
+  { html: P.backcover, label: 'Dos de couverture' },
+];
+
+let mCur = 0;
+let mBusy = false;
+
+const mvEl    = document.getElementById('mv');
+const mvpEl   = document.getElementById('mvp');
+const mvpwEl  = document.getElementById('mvpw');
+const mvbpEl  = document.getElementById('mvbp');
+const mvbnEl  = document.getElementById('mvbn');
+const mvdotsEl= document.getElementById('mvdots');
+const mvpiEl  = document.getElementById('mvpi');
+const mvlblEl = document.getElementById('mv-lbl');
+
+// Build mobile dots
+PAGES.forEach((pg, i) => {
+  const d = document.createElement('div');
+  d.className = 'mv-dot' + (i === 0 ? ' on' : '');
+  d.title = pg.label;
+  d.onclick = () => mJump(i);
+  mvdotsEl.appendChild(d);
+});
+
+function getMobScale() {
+  const avail = Math.min(window.innerWidth * 0.96, 420);
+  return Math.min(1, avail / 356);
+}
+
+function applyMobScale() {
+  const sc = getMobScale();
+  mvpEl.style.transform = `scale(${sc})`;
+  mvpEl.style.transformOrigin = 'top left';
+  const w = Math.round(356 * sc);
+  const h = Math.round(494 * sc);
+  mvpwEl.style.width  = w + 'px';
+  mvpwEl.style.height = h + 'px';
+}
+
+function mSetDots(n) {
+  mvdotsEl.querySelectorAll('.mv-dot').forEach((d, i) => d.classList.toggle('on', i === n));
+}
+
+function mUpdateUI() {
+  mvbpEl.disabled = mCur === 0;
+  mvbnEl.disabled = mCur === PAGES.length - 1;
+  mvpiEl.textContent = `${mCur + 1} / ${PAGES.length}`;
+  mvlblEl.textContent = PAGES[mCur].label;
+  mSetDots(mCur);
+}
+
+function mRender(idx, dir) {
+  if (mBusy) return;
+  mBusy = true;
+  mvpEl.style.opacity = '0';
+  setTimeout(() => {
+    mCur = idx;
+    mvpEl.innerHTML = PAGES[mCur].html;
+    applyMobScale();
+    mvpEl.style.opacity = '1';
+    mUpdateUI();
+    mBusy = false;
+  }, 200);
+}
+
+function mNext() { if (mCur < PAGES.length - 1) mRender(mCur + 1, 1); }
+function mPrev() { if (mCur > 0) mRender(mCur - 1, -1); }
+function mJump(i) { if (i !== mCur) mRender(i, i > mCur ? 1 : -1); }
+
+mvbnEl.addEventListener('click', mNext);
+mvbpEl.addEventListener('click', mPrev);
+
+// Touch swipe
+let txStart = 0, tyStart = 0;
+mvEl.addEventListener('touchstart', e => {
+  txStart = e.touches[0].clientX;
+  tyStart = e.touches[0].clientY;
+}, { passive: true });
+mvEl.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - txStart;
+  const dy = e.changedTouches[0].clientY - tyStart;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 44) {
+    if (dx < 0) mNext();
+    else mPrev();
+  }
+}, { passive: true });
+
+// Keyboard on mobile too
+document.addEventListener('keydown', e => {
+  if (window.innerWidth <= 768) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') mNext();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   mPrev();
+  }
+});
+
+// ─── MODE SWITCHER ────────────────────────────────────
+function isMob() { return window.innerWidth <= 768; }
+
+function checkMode() {
+  const mob = isMob();
+  mvEl.style.display = mob ? 'flex' : 'none';
+  if (mob) {
+    mvpEl.innerHTML = PAGES[mCur].html;
+    applyMobScale();
+    mUpdateUI();
+  }
+}
+
+window.addEventListener('resize', () => {
+  checkMode();
+  if (isMob()) applyMobScale();
+});
+
+checkMode();
+</script>
+</body>
+</html>
