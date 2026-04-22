@@ -8,8 +8,25 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 
+:root {
+  --gold:      #e8a930;
+  --gold-dim:  rgba(232,169,48,0.45);
+  --red:       #c1522a;
+  --dark-red:  #7a2a10;
+  --paper:     #fdf6e4;
+  --paper-alt: #f5ead0;
+  --text:      #2c1e0c;
+  --accent:    #8b3318;
+}
+
+/* ─── BODY & BACKGROUND ──────────────────────────── */
 body {
-  background: #1e1e1e;
+  background: #0c0905;
+  background-image:
+    radial-gradient(ellipse 120% 60% at 50% 0%,   rgba(100,45,12,0.40) 0%, transparent 70%),
+    radial-gradient(ellipse 80%  50% at 50% 100%,  rgba(8,4,2,0.80)     0%, transparent 60%),
+    radial-gradient(ellipse 60%  80% at 0%   50%,  rgba(60,20,5,0.18)   0%, transparent 60%),
+    radial-gradient(ellipse 60%  80% at 100% 50%,  rgba(60,20,5,0.18)   0%, transparent 60%);
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
@@ -18,123 +35,205 @@ body {
   justify-content: center;
   font-family: 'Amiri', Georgia, serif;
   overflow: hidden;
-  gap: 18px;
+  gap: 14px;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
-/* ─── TOP BAR ─────────────────────────────────── */
+/* Subtle grain texture on body */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── TOP BAR ─────────────────────────────────────── */
 .topbar {
+  position: relative; z-index: 10;
   display: flex;
   align-items: center;
-  gap: 16px;
-  color: rgba(255,255,255,0.5);
-  font-size: 12px;
-  letter-spacing: 1px;
-  font-family: sans-serif;
+  gap: 10px;
+  padding: 7px 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 100px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
-.topbar-title { color: rgba(255,255,255,0.75); font-size: 13px; }
+.topbar-title {
+  font-family: 'Scheherazade New', serif;
+  font-size: 14px;
+  color: rgba(232,169,48,0.85);
+  letter-spacing: 0.3px;
+}
+.topbar-sep { color: rgba(232,169,48,0.2); font-size: 9px; }
+.topbar-author {
+  font-family: sans-serif;
+  font-size: 10px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 1.5px;
+}
+.topbar-chapter {
+  font-family: sans-serif;
+  font-size: 10px;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 1px;
+}
 
-/* ─── STAGE ───────────────────────────────────── */
+/* ─── STAGE ───────────────────────────────────────── */
 .stage {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
+  position: relative;
+  z-index: 10;
 }
 
-/* ─── ARROW BUTTONS ───────────────────────────── */
+/* ─── ARROW BUTTONS ───────────────────────────────── */
 .arr {
-  background: none;
-  border: 1.5px solid rgba(255,255,255,0.15);
-  color: rgba(255,255,255,0.6);
-  width: 48px; height: 80px;
-  border-radius: 8px;
-  font-size: 30px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.09);
+  color: rgba(255,255,255,0.45);
+  width: 42px; height: 88px;
+  border-radius: 100px;
+  font-size: 24px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.22s ease;
   flex-shrink: 0;
+  backdrop-filter: blur(4px);
 }
 .arr:hover:not(:disabled) {
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(255,255,255,0.35);
-  color: white;
+  background: rgba(232,169,48,0.1);
+  border-color: rgba(232,169,48,0.4);
+  color: var(--gold);
+  box-shadow: 0 0 22px rgba(232,169,48,0.12), inset 0 0 12px rgba(232,169,48,0.05);
 }
-.arr:disabled { opacity: 0.12; cursor: not-allowed; }
+.arr:active:not(:disabled) { transform: scale(0.95); }
+.arr:disabled { opacity: 0.09; cursor: not-allowed; }
 
-/* ─── BOOK WRAPPER (PERSPECTIVE) ──────────────── */
+/* ─── BOOK WRAPPER ────────────────────────────────── */
 .book-wrap {
-  perspective: 3000px;
+  perspective: 2600px;
   position: relative;
 }
 
-/* ─── PAGE-STACK DEPTH ────────────────────────── */
-.stk {
-  position: absolute;
-  z-index: -1;
-}
-/* right-side stack */
-.sr1{right:-2px;top:2px;width:358px;height:494px;background:#e2dad0;border-radius:0 5px 5px 0;}
-.sr2{right:-4px;top:4px;width:358px;height:494px;background:#d5ccc2;border-radius:0 5px 5px 0;}
-.sr3{right:-6px;top:6px;width:358px;height:494px;background:#c9c0b5;border-radius:0 5px 5px 0;}
-/* left-side stack */
-.sl1{left:-2px;top:2px;width:358px;height:494px;background:#e2dad0;border-radius:5px 0 0 5px;}
-.sl2{left:-4px;top:4px;width:358px;height:494px;background:#d5ccc2;border-radius:5px 0 0 5px;}
-.sl3{left:-6px;top:6px;width:358px;height:494px;background:#c9c0b5;border-radius:5px 0 0 5px;}
+/* ─── PAGE STACK (depth illusion) ─────────────────── */
+.stk { position: absolute; z-index: -1; }
+/* right stack — 4 layers */
+.sr1{right:-2px; top:2px;  width:360px;height:498px;background:#ede0c8;border-radius:0 6px 6px 0;}
+.sr2{right:-4px; top:4px;  width:360px;height:498px;background:#e0d2b8;border-radius:0 6px 6px 0;}
+.sr3{right:-6px; top:6px;  width:360px;height:498px;background:#d3c4a6;border-radius:0 6px 6px 0;}
+.sr4{right:-8px; top:8px;  width:358px;height:498px;background:#c6b694;border-radius:0 6px 6px 0;}
+/* left stack — 4 layers */
+.sl1{left:-2px; top:2px;  width:360px;height:498px;background:#ede0c8;border-radius:6px 0 0 6px;}
+.sl2{left:-4px; top:4px;  width:360px;height:498px;background:#e0d2b8;border-radius:6px 0 0 6px;}
+.sl3{left:-6px; top:6px;  width:360px;height:498px;background:#d3c4a6;border-radius:6px 0 0 6px;}
+.sl4{left:-8px; top:8px;  width:358px;height:498px;background:#c6b694;border-radius:6px 0 0 6px;}
 
-/* ─── THE BOOK ─────────────────────────────────── */
+/* ─── THE BOOK ─────────────────────────────────────── */
 .book {
   position: relative;
-  width: 728px; /* 356 + 16 + 356 */
+  width: 728px;
   height: 494px;
   transform-style: preserve-3d;
+  /* Subtle realistic tilt */
+  transform: rotateX(2.5deg);
+  filter: drop-shadow(0 28px 56px rgba(0,0,0,0.72)) drop-shadow(0 8px 16px rgba(0,0,0,0.4));
 }
 
-/* ─── PAGES ────────────────────────────────────── */
+/* ─── PAGES ───────────────────────────────────────── */
 .pl, .pr {
   position: absolute;
   top: 0;
   width: 356px;
   height: 494px;
   overflow: hidden;
-  background: #fdfaf4;
+  background: var(--paper);
 }
 .pl {
   left: 0;
-  border-radius: 6px 0 0 6px;
-  box-shadow: inset -6px 0 18px rgba(0,0,0,0.1), 3px 0 5px rgba(0,0,0,0.2);
+  border-radius: 7px 0 0 7px;
+  box-shadow:
+    inset -10px 0 22px rgba(0,0,0,0.10),
+    inset -1px  0 3px  rgba(0,0,0,0.06),
+    4px 0 8px rgba(0,0,0,0.18);
 }
 .pr {
   right: 0;
-  border-radius: 0 6px 6px 0;
-  box-shadow: inset 6px 0 18px rgba(0,0,0,0.1);
+  border-radius: 0 7px 7px 0;
+  box-shadow: inset 10px 0 22px rgba(0,0,0,0.10),
+              inset  1px 0 3px  rgba(0,0,0,0.06);
 }
-/* Spine shading overlays */
+/* Spine gradient shadow */
 .pl::after {
   content:''; position:absolute; top:0; right:0;
-  width:32px; height:100%;
-  background:linear-gradient(to left,rgba(0,0,0,0.11),transparent);
+  width:48px; height:100%;
+  background: linear-gradient(to left,
+    rgba(0,0,0,0.16) 0%,
+    rgba(0,0,0,0.05) 55%,
+    transparent 100%);
   pointer-events:none; z-index:2;
 }
 .pr::before {
   content:''; position:absolute; top:0; left:0;
-  width:32px; height:100%;
-  background:linear-gradient(to right,rgba(0,0,0,0.11),transparent);
+  width:48px; height:100%;
+  background: linear-gradient(to right,
+    rgba(0,0,0,0.16) 0%,
+    rgba(0,0,0,0.05) 55%,
+    transparent 100%);
   pointer-events:none; z-index:2;
 }
+/* Edge highlight on outer sides */
+.pl::before {
+  content:''; position:absolute; top:0; left:0;
+  width:2px; height:100%;
+  background: linear-gradient(to bottom,
+    rgba(255,255,255,0.75) 0%,
+    rgba(255,255,255,0.3)  50%,
+    rgba(255,255,255,0.75) 100%);
+  pointer-events:none; z-index:3;
+}
 
-/* ─── SPINE ─────────────────────────────────────── */
+/* ─── SPINE ─────────────────────────────────────────── */
 .spine {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   width: 16px; height: 494px;
-  background: linear-gradient(to right,#3a2210 0%,#7a5030 22%,#c4986a 50%,#7a5030 78%,#3a2210 100%);
+  background: linear-gradient(to right,
+    #080300 0%,
+    #2e0e04 10%,
+    #7a3012 28%,
+    #c86838 46%,
+    #d47040 50%,
+    #b05028 54%,
+    #6a2808 72%,
+    #260a02 90%,
+    #080300 100%
+  );
   z-index: 6;
-  box-shadow: 0 0 12px rgba(0,0,0,0.35);
+  box-shadow:
+    0 0 14px rgba(0,0,0,0.55),
+    inset 0 0 5px rgba(220,140,60,0.15);
+  overflow: hidden;
+}
+/* Fine horizontal lines for spine texture */
+.spine::after {
+  content:'';
+  position:absolute; inset:0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 5px,
+    rgba(0,0,0,0.07) 5px,
+    rgba(0,0,0,0.07) 6px
+  );
 }
 
-/* ─── FLIP ELEMENT ───────────────────────────────── */
+/* ─── FLIP ELEMENT ─────────────────────────────────── */
 .flip {
   position: absolute; top: 0;
   width: 356px; height: 494px;
@@ -144,7 +243,7 @@ body {
 }
 .flip.fright { right:0; transform-origin: left center; }
 .flip.fleft  { left:0;  transform-origin: right center; }
-.flip.go { transition: transform 0.88s cubic-bezier(0.55,0,0.45,1); }
+.flip.go { transition: transform 0.92s cubic-bezier(0.48,0,0.38,1); }
 
 .ff, .fb {
   position: absolute;
@@ -154,41 +253,68 @@ body {
 }
 .fb { transform: rotateY(180deg); }
 
-/* curl shadow on flip edge */
+/* Curl shadow on flip edge */
 .flip.fright .ff::after {
   content:''; position:absolute; left:0; top:0;
-  width:24px; height:100%;
-  background:linear-gradient(to right,rgba(0,0,0,0.18),transparent);
+  width:42px; height:100%;
+  background: linear-gradient(to right,
+    rgba(0,0,0,0.24) 0%,
+    rgba(0,0,0,0.08) 55%,
+    transparent 100%);
   pointer-events:none; z-index:3;
 }
 .flip.fleft .ff::after {
   content:''; position:absolute; right:0; top:0;
-  width:24px; height:100%;
-  background:linear-gradient(to left,rgba(0,0,0,0.18),transparent);
+  width:42px; height:100%;
+  background: linear-gradient(to left,
+    rgba(0,0,0,0.24) 0%,
+    rgba(0,0,0,0.08) 55%,
+    transparent 100%);
   pointer-events:none; z-index:3;
 }
 
-/* ─── DROP SHADOW ─────────────────────────────────── */
+/* ─── BOOK DROP SHADOW ──────────────────────────────── */
 .book-shadow {
-  position:absolute; bottom:-22px; left:50%;
+  position:absolute; bottom:-30px; left:50%;
   transform:translateX(-50%);
-  width:710px; height:28px;
-  background:radial-gradient(ellipse at center,rgba(0,0,0,0.55) 0%,transparent 68%);
+  width:720px; height:36px;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,0.68) 0%,transparent 68%);
   pointer-events:none; z-index:-2;
 }
 
-/* ─── BOTTOM BAR ──────────────────────────────────── */
+/* ─── BOTTOM BAR ─────────────────────────────────────── */
 .botbar {
-  display:flex; align-items:center; gap:20px;
-  color:rgba(255,255,255,0.4); font-family:sans-serif; font-size:11px; letter-spacing:0.5px;
+  position: relative; z-index: 10;
+  display: flex; align-items: center; gap: 14px;
+  padding: 7px 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 100px;
+  backdrop-filter: blur(8px);
 }
-.dots { display:flex; gap:5px; }
+.botbar-pi {
+  font-family: sans-serif;
+  font-size: 10px;
+  color: rgba(255,255,255,0.28);
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+}
+.dots { display:flex; gap:5px; align-items:center; }
 .dot {
-  width:7px; height:7px; border-radius:50%;
-  background:rgba(255,255,255,0.18); cursor:pointer;
-  transition:background 0.2s, transform 0.2s;
+  height: 6px;
+  width: 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.16);
+  cursor: pointer;
+  transition: background 0.28s ease, width 0.28s ease, transform 0.28s ease;
+  flex-shrink: 0;
 }
-.dot.on { background:rgba(255,255,255,0.7); transform:scale(1.2); }
+.dot:hover { background: rgba(255,255,255,0.32); }
+.dot.on {
+  background: var(--gold);
+  width: 20px;
+  box-shadow: 0 0 8px rgba(232,169,48,0.4);
+}
 
 
 /* ═══════════════════════════════════════════════════
@@ -196,193 +322,280 @@ body {
 ═══════════════════════════════════════════════════ */
 
 .pg {
-  width:356px; height:494px;
-  background:
-    radial-gradient(ellipse at top left, rgba(193,82,42,0.05), transparent 60%),
-    radial-gradient(ellipse at bottom right, rgba(160,120,64,0.06), transparent 60%),
-    #fdfaf4;
-  display:flex; flex-direction:column;
-  position:relative; overflow:hidden;
+  width: 356px; height: 494px;
+  background: var(--paper);
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
 }
 
-/* COVER */
+/* Subtle aged paper texture on all pages */
+.pg::after {
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+/* ─── COVER ─────────────────────────────────────────── */
 .pg.cov {
-  background: linear-gradient(150deg,#c1522a 0%,#7a2a10 40%,#1e0e04 100%);
-  align-items:center; justify-content:center; gap:0;
+  background: linear-gradient(165deg, #1c0a02 0%, #3e1408 38%, #0e0400 100%);
+  align-items: center; justify-content: center;
 }
+.pg.cov::after { display: none; }
+
+/* Double border frame */
+.cov-frame-outer {
+  position: absolute; inset: 10px;
+  border: 1px solid rgba(232,169,48,0.38);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.cov-frame-inner {
+  position: absolute; inset: 15px;
+  border: 0.5px solid rgba(232,169,48,0.18);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+/* Corner SVG ornaments */
+.cov-cnr {
+  position: absolute;
+  width: 26px; height: 26px;
+  color: rgba(232,169,48,0.55);
+}
+.cov-cnr.tl { top:10px;  left:10px;  }
+.cov-cnr.tr { top:10px;  right:10px; transform: scaleX(-1); }
+.cov-cnr.bl { bottom:10px; left:10px;  transform: scaleY(-1); }
+.cov-cnr.br { bottom:10px; right:10px; transform: scale(-1,-1); }
+
 .cov-inner {
-  position:absolute; inset:12px;
-  border:1.5px solid rgba(232,169,48,0.4);
-  border-radius:3px;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:space-between;
-  padding:20px 18px 18px;
-  overflow:hidden;
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: space-between;
+  padding: 28px 20px 24px;
+  z-index: 2;
 }
-.cov-orn { color:#e8a930; font-size:16px; letter-spacing:6px; opacity:.7; }
+
+.cov-top {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+.cov-series {
+  font-family: sans-serif;
+  font-size: 8px; letter-spacing: 4.5px;
+  color: rgba(232,169,48,0.42); text-transform: uppercase;
+}
+.cov-orn-top {
+  font-size: 11px; letter-spacing: 9px;
+  color: rgba(232,169,48,0.5);
+  margin-top: 3px;
+}
+
+/* Illustration frame */
+.cov-illus {
+  width: 278px; height: 178px;
+  border-radius: 3px; overflow: hidden;
+  border: 1px solid rgba(232,169,48,0.4);
+  box-shadow:
+    0 0 0 3px rgba(14,5,1,0.9),
+    0 0 0 4px rgba(232,169,48,0.15),
+    0 10px 36px rgba(0,0,0,0.65);
+  flex-shrink: 0;
+}
+.cov-illus svg { width:100%; height:100%; display:block; }
+
+.cov-bottom {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  text-align: center;
+}
 .cov-h1 {
-  font-family:'Scheherazade New',serif;
-  font-size:26px; color:#f5d86e;
-  text-align:center; line-height:1.35;
-  text-shadow:0 2px 10px rgba(0,0,0,0.5);
+  font-family: 'Scheherazade New', serif;
+  font-size: 25px; color: #f0cc62;
+  line-height: 1.3;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.55), 0 0 35px rgba(220,160,40,0.22);
+  letter-spacing: 0.3px;
 }
-.cov-sub { font-size:12px; color:rgba(245,234,216,0.55); letter-spacing:2px; margin-top:4px; }
-.cov-foot { font-size:10px; color:rgba(232,169,48,0.5); letter-spacing:3px; text-transform:uppercase; }
+.cov-tifinagh {
+  font-size: 10.5px; letter-spacing: 2.5px;
+  color: rgba(232,169,48,0.42);
+  margin-top: 3px;
+}
+.cov-author {
+  font-family: sans-serif;
+  font-size: 9.5px; letter-spacing: 2.5px;
+  color: rgba(232,169,48,0.6);
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+.cov-footer {
+  font-family: sans-serif;
+  font-size: 8px; letter-spacing: 3.5px;
+  color: rgba(232,169,48,0.28); text-transform: uppercase;
+  margin-top: 4px;
+}
 
-/* BACK COVER */
+/* ─── BACK COVER ────────────────────────────────────── */
 .pg.back {
-  background:linear-gradient(30deg,#c1522a 0%,#7a2a10 40%,#1e0e04 100%);
-  align-items:center; justify-content:center;
+  background: linear-gradient(200deg, #0e0400 0%, #3a1206 45%, #1c0802 100%);
+  align-items: center; justify-content: center;
 }
+.pg.back::after { display: none; }
 
-/* STORY PAGES */
+/* ─── STORY PAGES ────────────────────────────────────── */
 .pg-hdr {
-  height:22px; flex-shrink:0;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:0 14px;
-  background:linear-gradient(to bottom,#ede5cf,transparent);
+  height: 25px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+  background: linear-gradient(to bottom, #e8d9bc, #f5edda);
+  border-bottom: 1px solid rgba(180,130,60,0.16);
 }
-.pg-num { font-size:9px; color:#c1522a; letter-spacing:1px; font-family:sans-serif; }
-.pg-tag { font-size:9px; color:#a07840; letter-spacing:1px; font-family:sans-serif; }
+.pg-num {
+  font-family: sans-serif;
+  font-size: 8.5px; color: var(--red);
+  letter-spacing: 1px; font-weight: 700;
+}
+.pg-tag {
+  font-family: sans-serif;
+  font-size: 8px; color: #a07840;
+  letter-spacing: 1.5px; font-style: italic;
+}
 
 .pg-illus {
-  height:210px; flex-shrink:0; overflow:hidden;
-  border-bottom:1px solid rgba(193,82,42,0.18);
-  box-shadow: inset 0 -8px 16px -10px rgba(60,30,10,0.25);
+  height: 200px; flex-shrink: 0; overflow: hidden;
+  position: relative;
 }
-.pg-illus svg, .pg-illus img { width:100%; height:100%; display:block; object-fit:cover; }
+/* Fade illustration into page */
+.pg-illus::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 50px;
+  background: linear-gradient(to top, var(--paper), transparent);
+  z-index: 1; pointer-events: none;
+}
+.pg-illus svg, .pg-illus img {
+  width: 100%; height: 100%; display: block; object-fit: cover;
+}
 
 .pg-div {
-  height:1px; flex-shrink:0; margin:7px 16px;
-  background:linear-gradient(to right,transparent,#d4882e 30%,#d4882e 70%,transparent);
+  height: 1px; flex-shrink: 0; margin: 6px 22px;
+  background: linear-gradient(to right,
+    transparent 0%,
+    rgba(193,82,42,0.35) 20%,
+    rgba(193,82,42,0.35) 80%,
+    transparent 100%);
 }
 
 .pg-ch {
-  font-family:'Scheherazade New',serif;
-  font-size:15px; color:#8b3318;
-  text-align:center; padding:0 14px 4px;
-  flex-shrink:0; line-height:1.3;
+  font-family: 'Scheherazade New', serif;
+  font-size: 15px; color: var(--accent);
+  text-align: center; padding: 0 16px 5px;
+  flex-shrink: 0; line-height: 1.3;
 }
 
 .pg-body {
-  flex:1; padding:2px 14px 10px;
-  font-size:11.5px; line-height:1.78; color:#2c2416;
-  overflow:hidden;
+  flex: 1; padding: 2px 16px 10px;
+  font-size: 11.5px; line-height: 1.82; color: var(--text);
+  overflow: hidden;
+  position: relative; z-index: 2;
 }
-.pg-body p { margin-bottom:2px; }
-.d { color:#8b3318; font-style:italic; font-weight:700; }
+.pg-body p { margin-bottom: 3px; }
+.d { color: var(--accent); font-style: italic; font-weight: 700; }
 .les {
-  background:rgba(193,82,42,0.07);
-  border-left:2.5px solid #d4882e;
-  padding:5px 9px; margin-top:7px;
-  font-style:italic; font-size:11px; color:#6b4020;
-  line-height:1.6;
+  background: rgba(193,82,42,0.055);
+  border-left: 2.5px solid #d4882e;
+  padding: 6px 10px; margin-top: 8px;
+  font-style: italic; font-size: 11px; color: #6b4020;
+  line-height: 1.68;
+  border-radius: 0 3px 3px 0;
 }
 
-/* COLOPHON PAGE */
+/* ─── COLOPHON ───────────────────────────────────────── */
 .pg.colo {
-  background:#fdfaf4;
-  align-items:center; justify-content:center; gap:18px;
-  text-align:center;
+  background: var(--paper);
+  align-items: center; justify-content: center; gap: 20px;
+  text-align: center;
 }
 .colo-text {
-  font-family:'Scheherazade New',serif;
-  font-size:16px; color:#8b3318; line-height:2;
-  padding:0 28px;
+  font-family: 'Scheherazade New', serif;
+  font-size: 17px; color: var(--accent); line-height: 2.15;
+  padding: 0 28px;
 }
-.colo-orn { font-size:22px; color:#d4882e; opacity:.6; letter-spacing:8px; }
+.colo-orn { font-size: 22px; color: #d4882e; opacity: .45; letter-spacing: 10px; }
 
-/* BLANK LEFT (first spread) */
-.pg.blank { background:#f5f0e8; }
-
-/* AUTHOR LINE ON COVER */
-.cov-author {
-  font-size: 11px;
-  color: rgba(232,169,48,0.8);
-  letter-spacing: 2px;
-  margin-top: 6px;
-  font-family: sans-serif;
-  text-transform: uppercase;
+/* ─── BLANK PAGE ─────────────────────────────────────── */
+.pg.blank {
+  background: linear-gradient(160deg, #f5eddb, #f0e4c8);
+  align-items: center; justify-content: center;
 }
+
 
 /* ═══════════════════════════════════════════════════
-   MOBILE VIEW  (≤ 768 px)
+   MOBILE  (≤ 768 px)
 ═══════════════════════════════════════════════════ */
 
-/* ─ Mobile wrapper ─ */
 #mv {
   display: none;
   flex-direction: column;
   align-items: center;
   width: 100%;
   min-height: 100dvh;
-  padding: 14px 0 24px;
+  padding: 14px 0 26px;
   gap: 12px;
-  background: #1e1e1e;
+  background: #0c0905;
+  background-image:
+    radial-gradient(ellipse 140% 40% at 50% 0%, rgba(100,45,12,0.35) 0%, transparent 65%);
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-/* ─ Mobile header ─ */
 .mv-hdr {
   text-align: center;
-  padding: 0 16px;
+  padding: 0 20px;
 }
 .mv-hdr-title {
   font-family: 'Scheherazade New', serif;
-  font-size: 17px;
-  color: #f5d86e;
+  font-size: 18px; color: #f0cc62;
   line-height: 1.3;
 }
 .mv-hdr-author {
   font-family: sans-serif;
-  font-size: 10px;
-  color: rgba(232,169,48,0.7);
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  font-size: 9.5px; letter-spacing: 2px;
+  color: rgba(232,169,48,0.6); text-transform: uppercase;
   margin-top: 3px;
 }
 .mv-hdr-label {
   font-family: sans-serif;
-  font-size: 10px;
-  color: rgba(255,255,255,0.35);
-  letter-spacing: 1px;
-  margin-top: 4px;
+  font-size: 9.5px; letter-spacing: 1px;
+  color: rgba(255,255,255,0.28);
+  margin-top: 5px;
 }
 
-/* ─ Mobile page display ─ */
 .mv-stage {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
+  display: flex; align-items: flex-start; justify-content: center;
   width: 100%;
 }
 .mv-page-wrap {
-  /* width/height set by JS */
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
   border-radius: 8px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
+  box-shadow:
+    0 10px 44px rgba(0,0,0,0.65),
+    0 2px 8px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(232,169,48,0.08);
 }
 #mvp {
   transform-origin: top left;
   transition: opacity 0.22s ease;
 }
 
-/* ─ Mobile nav ─ */
 .mv-nav {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 12px;
+  display: flex; align-items: center;
+  gap: 12px; padding: 0 16px;
 }
 .mv-arr {
-  background: rgba(255,255,255,0.07);
-  border: 1.5px solid rgba(255,255,255,0.18);
-  color: rgba(255,255,255,0.75);
-  width: 54px; height: 54px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.7);
+  width: 52px; height: 52px;
   border-radius: 50%;
-  font-size: 28px;
+  font-size: 26px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.18s;
@@ -391,54 +604,45 @@ body {
   user-select: none;
 }
 .mv-arr:active:not(:disabled) {
-  background: rgba(255,255,255,0.2);
-  color: white;
-  transform: scale(0.94);
+  background: rgba(232,169,48,0.18);
+  border-color: rgba(232,169,48,0.5);
+  color: var(--gold);
+  transform: scale(0.93);
 }
-.mv-arr:disabled { opacity: 0.12; }
+.mv-arr:disabled { opacity: 0.1; }
 
 .mv-dots {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 7px;
+  display: flex; flex-wrap: wrap;
+  justify-content: center; gap: 6px;
   max-width: 220px;
 }
 .mv-dot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.18);
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,255,255,0.16);
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.22s, transform 0.22s, width 0.22s;
   -webkit-tap-highlight-color: transparent;
 }
 .mv-dot.on {
-  background: #e8a930;
-  transform: scale(1.35);
+  background: var(--gold);
+  transform: scale(1.25);
+  box-shadow: 0 0 6px rgba(232,169,48,0.5);
 }
 
-/* ─ Mobile page counter ─ */
 .mv-pi {
-  font-family: sans-serif;
-  font-size: 11px;
-  color: rgba(255,255,255,0.32);
-  letter-spacing: 1px;
+  font-family: sans-serif; font-size: 10px;
+  color: rgba(255,255,255,0.28); letter-spacing: 1.5px;
 }
-
-/* ─ Swipe hint (shown briefly on first load) ─ */
 .mv-swipe-hint {
-  font-family: sans-serif;
-  font-size: 10px;
-  color: rgba(255,255,255,0.2);
-  letter-spacing: 1px;
+  font-family: sans-serif; font-size: 9.5px;
+  color: rgba(255,255,255,0.18); letter-spacing: 1px;
 }
 
 @media (max-width: 768px) {
   body {
     overflow: hidden;
     justify-content: flex-start;
-    padding: 0;
-    gap: 0;
+    padding: 0; gap: 0;
   }
   .topbar, .stage, .botbar { display: none !important; }
   #mv { display: flex; }
@@ -449,10 +653,10 @@ body {
 
 <div class="topbar">
   <span class="topbar-title">Tamacahut n Ccac d Wulac</span>
-  <span>·</span>
-  <span style="color:rgba(232,169,48,0.65);font-size:11px;letter-spacing:1.5px;font-family:sans-serif;">sɣuṛ Boussad TAMAZIRT</span>
-  <span>·</span>
-  <span id="ti">Asentel</span>
+  <span class="topbar-sep">◆</span>
+  <span class="topbar-author">sɣuṛ Boussad TAMAZIRT</span>
+  <span class="topbar-sep">◆</span>
+  <span class="topbar-chapter" id="ti">Asentel</span>
 </div>
 
 <div class="stage">
@@ -460,14 +664,13 @@ body {
 
   <div class="book-wrap">
     <!-- depth layers -->
-    <div class="stk sl3"></div><div class="stk sl2"></div><div class="stk sl1"></div>
-    <div class="stk sr3"></div><div class="stk sr2"></div><div class="stk sr1"></div>
+    <div class="stk sl4"></div><div class="stk sl3"></div><div class="stk sl2"></div><div class="stk sl1"></div>
+    <div class="stk sr4"></div><div class="stk sr3"></div><div class="stk sr2"></div><div class="stk sr1"></div>
 
     <div class="book" id="bk">
       <div class="pl" id="pl"></div>
       <div class="spine"></div>
       <div class="pr" id="pr"></div>
-      <!-- flip element -->
       <div class="flip" id="fl">
         <div class="ff" id="ff"></div>
         <div class="fb" id="fb"></div>
@@ -481,7 +684,7 @@ body {
 
 <div class="botbar">
   <div class="dots" id="dots"></div>
-  <span id="pi">1 / 8</span>
+  <span class="botbar-pi" id="pi">1 / 8</span>
 </div>
 
 <!-- ═══════════ MOBILE VIEW ═══════════ -->
@@ -507,7 +710,7 @@ body {
 
 <script>
 // ════════════════════════════════════════════════════
-//  SVG ILLUSTRATIONS
+//  SVG ILLUSTRATIONS (external images)
 // ════════════════════════════════════════════════════
 
 const SVG = {
@@ -524,6 +727,193 @@ const SVG = {
   oliveman:       '<img src="11_oliveman.jpg" alt="">',
   reunion:        '<img src="12_reunion.jpg" alt="">'
 };
+
+// ════════════════════════════════════════════════════
+//  COVER SVG ILLUSTRATION (inline, no external dep)
+// ════════════════════════════════════════════════════
+
+const COV_SVG = `<svg viewBox="0 0 278 178" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <linearGradient id="cSky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%"   stop-color="#05041c"/>
+    <stop offset="52%"  stop-color="#16082e"/>
+    <stop offset="100%" stop-color="#3c1408"/>
+  </linearGradient>
+  <radialGradient id="cMoon" cx="0.79" cy="0.2" r="0.22">
+    <stop offset="0%"   stop-color="rgba(255,240,160,0.38)"/>
+    <stop offset="100%" stop-color="transparent"/>
+  </radialGradient>
+  <radialGradient id="cVill" cx="0.58" cy="0.5" r="0.3">
+    <stop offset="0%"   stop-color="rgba(240,160,40,0.22)"/>
+    <stop offset="100%" stop-color="transparent"/>
+  </radialGradient>
+  <linearGradient id="cHoriz" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%"   stop-color="rgba(140,45,6,0.28)"/>
+    <stop offset="100%" stop-color="transparent"/>
+  </linearGradient>
+  <linearGradient id="cGnd" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%"   stop-color="#2a0e04"/>
+    <stop offset="100%" stop-color="#0c0402"/>
+  </linearGradient>
+  <filter id="cBlur" x="-20%" y="-20%" width="140%" height="140%">
+    <feGaussianBlur stdDeviation="1.5"/>
+  </filter>
+</defs>
+
+<!-- Sky -->
+<rect width="278" height="178" fill="url(#cSky)"/>
+<rect width="278" height="178" fill="url(#cMoon)"/>
+
+<!-- Stars — varying opacity & size -->
+<g fill="white">
+  <circle cx="14"  cy="9"  r="0.75" opacity=".9"/>
+  <circle cx="36"  cy="5"  r="0.6"  opacity=".75"/>
+  <circle cx="58"  cy="13" r="0.85" opacity=".85"/>
+  <circle cx="85"  cy="4"  r="0.65" opacity=".8"/>
+  <circle cx="110" cy="16" r="0.5"  opacity=".72"/>
+  <circle cx="135" cy="7"  r="0.78" opacity=".9"/>
+  <circle cx="155" cy="21" r="0.5"  opacity=".68"/>
+  <circle cx="175" cy="9"  r="0.7"  opacity=".82"/>
+  <circle cx="243" cy="13" r="0.75" opacity=".7"/>
+  <circle cx="260" cy="25" r="0.58" opacity=".88"/>
+  <circle cx="28"  cy="27" r="0.6"  opacity=".72"/>
+  <circle cx="72"  cy="31" r="0.5"  opacity=".68"/>
+  <circle cx="122" cy="27" r="0.7"  opacity=".84"/>
+  <circle cx="192" cy="40" r="0.5"  opacity=".72"/>
+  <circle cx="8"   cy="46" r="0.48" opacity=".68"/>
+  <circle cx="258" cy="46" r="0.6"  opacity=".78"/>
+  <circle cx="48"  cy="41" r="0.42" opacity=".62"/>
+  <circle cx="208" cy="7"  r="0.5"  opacity=".7"/>
+  <circle cx="228" cy="31" r="0.58" opacity=".72"/>
+  <circle cx="98"  cy="43" r="0.48" opacity=".68"/>
+  <circle cx="162" cy="38" r="0.45" opacity=".62"/>
+  <circle cx="270" cy="38" r="0.5"  opacity=".7"/>
+  <circle cx="6"   cy="28" r="0.5"  opacity=".65"/>
+</g>
+
+<!-- 4-pointed star glints -->
+<path d="M53 19 L54.4 23.2 L58.5 24.5 L54.4 25.8 L53 30 L51.6 25.8 L47.5 24.5 L51.6 23.2 Z" fill="white" opacity=".92"/>
+<path d="M192 27 L193 29.8 L196 31 L193 32.2 L192 35 L191 32.2 L188 31 L191 29.8 Z" fill="white" opacity=".82"/>
+<path d="M22 36 L22.9 38.4 L25.5 39.3 L22.9 40.2 L22 42.6 L21.1 40.2 L18.5 39.3 L21.1 38.4 Z" fill="white" opacity=".62"/>
+
+<!-- Crescent moon -->
+<circle cx="218" cy="29" r="16" fill="#ffe8a0" opacity=".88"/>
+<circle cx="228" cy="24" r="12.8" fill="#150a28"/>
+<!-- moon surface hint -->
+<path d="M210 25 Q208 31 213 36" stroke="rgba(255,255,190,0.4)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+
+<!-- Far mountain silhouette -->
+<path d="M0 90 L22 60 L48 74 L76 44 L106 66 L133 41 L160 61 L183 71 L207 51 L232 64 L254 49 L278 62 L278 178 L0 178 Z"
+      fill="#150702" opacity=".65"/>
+
+<!-- Mid mountains -->
+<path d="M0 110 L18 84 L44 98 L70 76 L94 90 L116 68 L142 84 L166 72 L188 86 L212 76 L236 92 L258 78 L278 88 L278 178 L0 178 Z"
+      fill="#200e04" opacity=".82"/>
+
+<!-- Foreground hills -->
+<path d="M0 126 L28 108 L62 118 L98 104 L128 116 L157 106 L186 118 L214 108 L244 120 L278 110 L278 178 L0 178 Z"
+      fill="#2c1006"/>
+
+<!-- Horizon warm glow -->
+<rect x="0" y="104" width="278" height="26" fill="url(#cHoriz)" opacity=".9"/>
+
+<!-- Village lights glow -->
+<ellipse cx="160" cy="88" rx="18" ry="6" fill="url(#cVill)" filter="url(#cBlur)"/>
+<!-- individual lights -->
+<circle cx="152" cy="88" r="1.2" fill="#f5c840" opacity=".55"/>
+<circle cx="159" cy="86" r="0.9" fill="#f5c840" opacity=".42"/>
+<circle cx="166" cy="89" r="1.1" fill="#f5c840" opacity=".5"/>
+<circle cx="172" cy="87" r="0.7" fill="#f5c840" opacity=".38"/>
+<circle cx="178" cy="90" r="0.8" fill="#f5c840" opacity=".32"/>
+<circle cx="102" cy="94" r="0.9" fill="#f5c840" opacity=".38"/>
+<circle cx="108" cy="92" r="0.75" fill="#f5c840" opacity=".32"/>
+
+<!-- Ground -->
+<path d="M0 142 Q70 136 139 138 Q200 140 278 136 L278 178 L0 178 Z" fill="#1a0804"/>
+
+<!-- Path between brothers -->
+<path d="M52 178 Q88 164 138 158 Q178 152 216 162 L224 178 Z" fill="#220e06" opacity=".72"/>
+
+<!-- ───── LEFT OLIVE TREE ─────────────────────────── -->
+<rect x="22" y="122" width="3.5" height="34" fill="#120602" rx="1.5"/>
+<path d="M23.5 122 Q20 114 15 108" stroke="#120602" stroke-width="2" fill="none" stroke-linecap="round"/>
+<ellipse cx="18"  cy="106" rx="13" ry="9"  fill="#162008" opacity=".92"/>
+<ellipse cx="27"  cy="102" rx="11" ry="8"  fill="#1c280a" opacity=".88"/>
+<ellipse cx="20"  cy="97"  rx="9"  ry="7"  fill="#141e06" opacity=".82"/>
+<ellipse cx="12"  cy="112" rx="7"  ry="5"  fill="#162008" opacity=".72"/>
+<circle cx="17"  cy="109" r="1.6" fill="#0c1604" opacity=".78"/>
+<circle cx="24"  cy="105" r="1.3" fill="#0c1604" opacity=".72"/>
+<circle cx="13"  cy="114" r="1.2" fill="#0c1604" opacity=".65"/>
+
+<!-- ───── RIGHT OLIVE TREE ────────────────────────── -->
+<rect x="250" y="118" width="4" height="38" fill="#120602" rx="1.5"/>
+<path d="M252 118 Q256 110 261 105" stroke="#120602" stroke-width="2" fill="none" stroke-linecap="round"/>
+<ellipse cx="257" cy="102" rx="14" ry="10" fill="#162008" opacity=".92"/>
+<ellipse cx="248" cy="107" rx="11" ry="8"  fill="#1c280a" opacity=".88"/>
+<ellipse cx="262" cy="110" rx="9"  ry="7"  fill="#141e06" opacity=".78"/>
+<circle cx="254" cy="106" r="1.4" fill="#0c1604" opacity=".75"/>
+<circle cx="262" cy="111" r="1.2" fill="#0c1604" opacity=".68"/>
+
+<!-- ───── ROCK / SHRUB clusters ──────────────────── -->
+<ellipse cx="62"  cy="148" rx="11" ry="4.5" fill="#1a0a04" opacity=".55"/>
+<ellipse cx="202" cy="145" rx="9"  ry="3.8" fill="#1a0a04" opacity=".48"/>
+
+<!-- ───── BROTHER 1 — Ccac (taller, walking stick) ── -->
+<g transform="translate(112,136)">
+  <!-- shadow ellipse -->
+  <ellipse cx="0" cy="36" rx="9" ry="3.2" fill="rgba(0,0,0,.42)"/>
+  <!-- back leg -->
+  <path d="M3 17 Q5 26 4 36"  stroke="#0a0402" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <!-- burnous body -->
+  <path d="M-10 -22 Q-12 2 -11 17 L11 17 Q12 2 10 -22 Z" fill="#1c0c04"/>
+  <!-- front leg -->
+  <path d="M-3 17 Q-5 26 -6 36" stroke="#0e0604" stroke-width="6"   fill="none" stroke-linecap="round"/>
+  <!-- back arm -->
+  <path d="M-10 -18 Q-14 -7 -13 1"  stroke="#160804" stroke-width="3.8" fill="none" stroke-linecap="round"/>
+  <!-- forward arm (holding stick) -->
+  <path d="M10 -18 Q14 -6 13 2"   stroke="#160804" stroke-width="3.8" fill="none" stroke-linecap="round"/>
+  <!-- neck -->
+  <rect x="-2.5" y="-26" width="5" height="5" fill="#100402"/>
+  <!-- head -->
+  <circle cx="0" cy="-32" r="6.2" fill="#100402"/>
+  <!-- chéchia (Kabyle cap) -->
+  <path d="M-5.5 -34 Q0 -44 5.5 -34 Q4 -29 -4 -29 Z" fill="#200e06"/>
+  <ellipse cx="0" cy="-34" rx="6" ry="2.2" fill="#2a1208"/>
+  <!-- walking stick -->
+  <line x1="14" y1="1" x2="17.5" y2="19" stroke="#301808" stroke-width="2.2" stroke-linecap="round"/>
+</g>
+
+<!-- ───── BROTHER 2 — Ulac (slightly shorter, behind) -->
+<g transform="translate(145,140)">
+  <ellipse cx="0" cy="29" rx="7.5" ry="2.8" fill="rgba(0,0,0,.38)"/>
+  <!-- back leg -->
+  <path d="M3 15 Q5 23 4 29"   stroke="#0a0402" stroke-width="5"   fill="none" stroke-linecap="round"/>
+  <!-- body -->
+  <path d="M-9 -20 Q-11 2 -10 15 L10 15 Q11 2 9 -20 Z" fill="#200e06"/>
+  <!-- front leg -->
+  <path d="M-2 15 Q-4 23 -5 29" stroke="#0e0604" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <!-- arms -->
+  <path d="M9 -16 Q12 -5 11 2"  stroke="#160804" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M-9 -16 Q-12 -5 -11 1" stroke="#160804" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <!-- neck -->
+  <rect x="-2.2" y="-24" width="4.4" height="5" fill="#100402"/>
+  <!-- head -->
+  <circle cx="0" cy="-29.5" r="5.8" fill="#100402"/>
+  <!-- turban (cheche) -->
+  <path d="M-5.8 -30 Q-3 -38 4 -35 Q6 -29 5.5 -27 Q0 -30 -5.8 -30 Z" fill="#240e06"/>
+  <ellipse cx="-1" cy="-31.5" rx="5.2" ry="1.8" fill="#1c0c06" opacity=".85"/>
+</g>
+
+<!-- ───── AMAZIGH star symbols (very subtle) ────── -->
+<g opacity=".18">
+  <polygon points="10,54 11.5,58.5 16.5,58.5 12.5,61.3 14,65.8 10,63 6,65.8 7.5,61.3 3.5,58.5 8.5,58.5"
+           fill="#f0c840"/>
+</g>
+<g opacity=".15">
+  <polygon points="262,60 263.4,64.2 268,64.2 264.3,66.8 265.6,71 262,68.4 258.4,71 259.7,66.8 256,64.2 260.6,64.2"
+           fill="#f0c840"/>
+</g>
+</svg>`;
 
 // ════════════════════════════════════════════════════
 //  PAGE BUILDER
@@ -550,28 +940,69 @@ function pgStory(num, tag, title, svgKey, bodyHtml) {
 
 const P = {
 
+/* ── COVER ───────────────────────────────────────── */
 cover: `<div class="pg cov">
+  <div class="cov-frame-outer"></div>
+  <div class="cov-frame-inner"></div>
+
+  <!-- Corner ornaments -->
+  <div class="cov-cnr tl"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 2 L14 2 L14 3.5 L3.5 3.5 L3.5 14 L2 14 Z" fill="rgba(232,169,48,.6)"/>
+    <circle cx="8" cy="8" r="2.5" fill="none" stroke="rgba(232,169,48,.4)" stroke-width=".8"/>
+    <circle cx="8" cy="8" r="1"   fill="rgba(232,169,48,.3)"/>
+  </svg></div>
+  <div class="cov-cnr tr"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 2 L14 2 L14 3.5 L3.5 3.5 L3.5 14 L2 14 Z" fill="rgba(232,169,48,.6)"/>
+    <circle cx="8" cy="8" r="2.5" fill="none" stroke="rgba(232,169,48,.4)" stroke-width=".8"/>
+    <circle cx="8" cy="8" r="1"   fill="rgba(232,169,48,.3)"/>
+  </svg></div>
+  <div class="cov-cnr bl"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 2 L14 2 L14 3.5 L3.5 3.5 L3.5 14 L2 14 Z" fill="rgba(232,169,48,.6)"/>
+    <circle cx="8" cy="8" r="2.5" fill="none" stroke="rgba(232,169,48,.4)" stroke-width=".8"/>
+    <circle cx="8" cy="8" r="1"   fill="rgba(232,169,48,.3)"/>
+  </svg></div>
+  <div class="cov-cnr br"><svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 2 L14 2 L14 3.5 L3.5 3.5 L3.5 14 L2 14 Z" fill="rgba(232,169,48,.6)"/>
+    <circle cx="8" cy="8" r="2.5" fill="none" stroke="rgba(232,169,48,.4)" stroke-width=".8"/>
+    <circle cx="8" cy="8" r="1"   fill="rgba(232,169,48,.3)"/>
+  </svg></div>
+
   <div class="cov-inner">
-    <div class="cov-orn">⬡ ✦ ⬡ ✦ ⬡</div>
-    <img src="illustrations/01_brothers_night.jpg" alt="" style="width:240px;height:160px;object-fit:cover;border-radius:4px;border:2px solid rgba(232,169,48,0.55);box-shadow:0 6px 22px rgba(0,0,0,0.5);">
-    <div style="text-align:center;">
-      <div class="cov-h1">Tamacahut n Ccac d Wulac</div>
-      <div class="cov-sub">ⵜⴰⵎⴰⵛⴰⵀⵓⵜ ⵏ ⵛⵛⴰⵛ ⴷ ⵡⵓⵍⴰⵛ</div>
-      <div class="cov-author">sɣuṛ Boussad TAMAZIRT</div>
+    <div class="cov-top">
+      <div class="cov-series">Idles n Yeqbayliyen</div>
+      <div class="cov-orn-top">⬡ ✦ ⬡ ✦ ⬡</div>
     </div>
-    <div class="cov-orn" style="font-size:14px;">✦ ⬡ ✦ ⬡ ✦</div>
-    <div class="cov-foot"> Idles n Yeqbayliyen</div>
+
+    <div class="cov-illus">${COV_SVG}</div>
+
+    <div class="cov-bottom">
+      <div class="cov-h1">Tamacahut n Ccac d Wulac</div>
+      <div class="cov-tifinagh">ⵜⴰⵎⴰⵛⴰⵀⵓⵜ ⵏ ⵛⵛⴰⵛ ⴷ ⵡⵓⵍⴰⵛ</div>
+      <div class="cov-author">sɣuṛ Boussad TAMAZIRT</div>
+      <div style="font-size:10px;letter-spacing:7px;color:rgba(232,169,48,.4);margin-top:4px;">✦ ⬡ ✦</div>
+      <div class="cov-footer">Tamacahut Tamaziɣt</div>
+    </div>
   </div>
 </div>`,
 
+/* ── BLANK PAGE ──────────────────────────────────── */
 blank: `<div class="pg blank" style="display:flex;align-items:center;justify-content:center;">
-  <svg viewBox="0 0 200 200" width="200" height="200" opacity=".08">
-    <path d="M100 20 L118 74 L176 74 L128 108 L147 162 L100 128 L53 162 L72 108 L24 74 L82 74 Z" fill="#8b3318"/>
-    <circle cx="100" cy="100" r="85" fill="none" stroke="#8b3318" stroke-width="1"/>
-    <circle cx="100" cy="100" r="70" fill="none" stroke="#8b3318" stroke-width="0.5"/>
+  <svg viewBox="0 0 220 220" width="200" height="200" opacity=".07">
+    <!-- Amazigh geometric pattern -->
+    <circle cx="110" cy="110" r="95" fill="none" stroke="#7a2a10" stroke-width="1.2"/>
+    <circle cx="110" cy="110" r="75" fill="none" stroke="#7a2a10" stroke-width=".7"/>
+    <circle cx="110" cy="110" r="55" fill="none" stroke="#7a2a10" stroke-width=".5"/>
+    <!-- 8-pointed star -->
+    <path d="M110 20 L120 78 L175 60 L137 100 L175 140 L120 122 L110 180 L100 122 L45 140 L83 100 L45 60 L100 78 Z" fill="#8b3318" stroke="#8b3318" stroke-width=".5" stroke-linejoin="round"/>
+    <!-- inner diamond -->
+    <path d="M110 72 L138 110 L110 148 L82 110 Z" fill="none" stroke="#8b3318" stroke-width=".8"/>
+    <!-- cross marks -->
+    <line x1="110" y1="15"  x2="110" y2="205" stroke="#8b3318" stroke-width=".4" opacity=".5"/>
+    <line x1="15"  y1="110" x2="205" y2="110" stroke="#8b3318" stroke-width=".4" opacity=".5"/>
   </svg>
 </div>`,
 
+/* ── STORY PAGES ─────────────────────────────────── */
 p1: pgStory(1, 'Tazwara', 'Sin watmaten ad d-ṣeyyeden',
   'brothers_night',
   `<p>Sin watmaten fɣen ad d-ṣeyyeden : yiwen isem-is <strong>Ccac</strong>, wayeḍ <strong>Ulac</strong>.</p>
@@ -624,7 +1055,7 @@ p6: pgStory(6, 'Wis kuẓ', 'Ccac d uterras',
 p7: pgStory(7, 'Wis semmus', 'Ccac d umeksa',
   'shepherd',
   `<p>Meskin Ccac ikemmel abrid-is, iqqaṛ « ad k-yenju Ṛebbi yenju-aɣ ». Yemlal-d ameksa, tafunast-is kan akken d-urew agenduz. Iɣil deg-s i d-yelti s wawal-nni, dɣa yewwet-it. Ccac, yettru, yenna-y-as :</p>
-   <p class="d">— Ayɣeṛ akka iyi-tewteḍ ? — Amek !!! Nekk turew-iyi-d tfunast agendduz, kečč ala d-teqqareḍ : « Ad k-yenju Ṛebbi yenju-aɣ ! »</p>
+   <p class="d">— Ayɣeṛ akka iyi-tewteḍ ? — Amek !!! Nekk turew-iyi-d tfunast agendduz, kečč ola d-teqqareḍ : « Ad k-yenju Ṛebbi yenju-aɣ ! »</p>
    <p class="d">— Ihi, amek yilaq ad d-iniɣ ? — Ini-d : « Ad t-kker d isengayen d inebggayen, ad neskkef, ad sekkfen medden. »</p>
    <div class="les">✦ Qal tura Ccac : <strong>« Ad t-kker d isengayen d inebggayen… »</strong></div>`),
 
@@ -660,6 +1091,7 @@ p12: pgStory(12, 'Tameggarut', 'Axxam !',
   'reunion',
   `<p>Ccac yuɣal iteddu, yeqqaṛ « Ṛebbi ad iɛin, Ṛebbi ad iɛin ». Yiwen ur t-id inuja. Almi d as-d-yesla <strong>gma-s</strong>, ferḥen imi d mlalen, ttun ṣyada-nni, ṭṭfen-d abrid s <strong>axxam</strong>. Ccac yules-as-d i Wulac d acu yakk i d-as-yeḍran deg ubrid.</p>`),
 
+/* ── COLOPHON ────────────────────────────────────── */
 p13: `<div class="pg colo">
   <div class="colo-orn">⬡ ✦ ⬡</div>
   <div class="colo-text">
@@ -670,37 +1102,67 @@ p13: `<div class="pg colo">
     ad as-yeɛfu Ṛebbi.
   </div>
   <div class="colo-orn">⬡ ✦ ⬡</div>
-  <div style="font-size:11px;color:#a07840;letter-spacing:2px;font-family:sans-serif;">ⵜⴰⵎⴰⵣⵉⵖⵜ</div>
+  <div style="font-size:11px;color:#a07840;letter-spacing:3px;font-family:sans-serif;margin-top:4px;">ⵜⴰⵎⴰⵣⵉⵖⵜ</div>
 </div>`,
 
-backcover: `<div class="pg back" style="display:flex;align-items:center;justify-content:center;">
-  <div style="text-align:center;padding:20px;">
-    <svg viewBox="0 0 120 120" width="120" height="120" opacity=".5">
-      <polygon points="60,8 72,42 108,42 80,62 92,96 60,76 28,96 40,62 12,42 48,42" fill="#f5d86e" stroke="#e8a930" stroke-width="1"/>
-    </svg>
-    <div style="color:rgba(232,169,48,0.5);font-size:11px;letter-spacing:3px;margin-top:16px;font-family:sans-serif;">TAMACAHUT</div>
-  </div>
+/* ── BACK COVER ──────────────────────────────────── */
+backcover: `<div class="pg back">
+  <svg viewBox="0 0 356 494" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;">
+    <defs>
+      <linearGradient id="bcBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#0e0400"/>
+        <stop offset="50%"  stop-color="#3c1208"/>
+        <stop offset="100%" stop-color="#1c0804"/>
+      </linearGradient>
+    </defs>
+    <rect width="356" height="494" fill="url(#bcBg)"/>
+    <!-- outer frame -->
+    <rect x="14" y="14" width="328" height="466" fill="none" stroke="rgba(232,169,48,.32)" stroke-width="1"/>
+    <rect x="19" y="19" width="318" height="456" fill="none" stroke="rgba(232,169,48,.16)" stroke-width=".6"/>
+    <!-- Amazigh 8-pointed star -->
+    <g transform="translate(178,200)">
+      <path d="M0,-70 L16,-28 L60,-28 L26,0 L42,42 L0,18 L-42,42 L-26,0 L-60,-28 L-16,-28 Z"
+            fill="none" stroke="rgba(232,169,48,.45)" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M0,-52 L12,-20 L44,-20 L20,0 L30,32 L0,14 L-30,32 L-20,0 L-44,-20 L-12,-20 Z"
+            fill="none" stroke="rgba(232,169,48,.28)" stroke-width=".8" stroke-linejoin="round"/>
+      <circle cx="0" cy="0" r="18" fill="none" stroke="rgba(232,169,48,.35)" stroke-width="1"/>
+      <circle cx="0" cy="0" r="8"  fill="rgba(232,169,48,.2)"/>
+      <circle cx="0" cy="0" r="3"  fill="rgba(232,169,48,.5)"/>
+    </g>
+    <!-- Tifinagh letters row -->
+    <text x="178" y="308" text-anchor="middle" font-size="18" fill="rgba(232,169,48,.3)" font-family="sans-serif" letter-spacing="6">ⵜⴰⵎⴰⵣⵉⵖⵜ</text>
+    <!-- divider lines -->
+    <line x1="60" y1="322" x2="296" y2="322" stroke="rgba(232,169,48,.2)" stroke-width=".8"/>
+    <line x1="60" y1="325" x2="296" y2="325" stroke="rgba(232,169,48,.1)" stroke-width=".4"/>
+    <!-- Publisher label -->
+    <text x="178" y="350" text-anchor="middle" font-size="9" fill="rgba(232,169,48,.35)" font-family="sans-serif" letter-spacing="4">IDLES N YEQBAYLIYEN</text>
+    <!-- decorative corner dots -->
+    <circle cx="30"  cy="30"  r="2.5" fill="rgba(232,169,48,.4)"/>
+    <circle cx="326" cy="30"  r="2.5" fill="rgba(232,169,48,.4)"/>
+    <circle cx="30"  cy="464" r="2.5" fill="rgba(232,169,48,.4)"/>
+    <circle cx="326" cy="464" r="2.5" fill="rgba(232,169,48,.4)"/>
+  </svg>
 </div>`
 
 };
 
 // ════════════════════════════════════════════════════
-//  SPREADS
+//  SPREADS (desktop two-page view)
 // ════════════════════════════════════════════════════
 
 const SPREADS = [
-  { l: P.blank,     r: P.cover,  label: 'Asentel' },
-  { l: P.p1,        r: P.p2,     label: 'Tazwara — Iɣ. 1-2' },
-  { l: P.p3,        r: P.p4,     label: 'Useyyad · Lǧanaza — Iɣ. 3-4' },
-  { l: P.p5,        r: P.p6,     label: 'Urgaz ifeṛḥen · Uterras — Iɣ. 5-6' },
-  { l: P.p7,        r: P.p8,     label: 'Umeksa · Urgaz bu siq — Iɣ. 7-8' },
-  { l: P.p9,        r: P.p10,    label: 'Ufellaḥ · Urgaz yemmundlen — Iɣ. 9-10' },
-  { l: P.p11,       r: P.p12,    label: 'Urgaz iɛebban · Axxam — Iɣ. 11-12' },
+  { l: P.blank,     r: P.cover,     label: 'Asentel' },
+  { l: P.p1,        r: P.p2,        label: 'Tazwara — Iɣ. 1-2' },
+  { l: P.p3,        r: P.p4,        label: 'Useyyad · Lǧanaza — Iɣ. 3-4' },
+  { l: P.p5,        r: P.p6,        label: 'Urgaz ifeṛḥen · Uterras — Iɣ. 5-6' },
+  { l: P.p7,        r: P.p8,        label: 'Umeksa · Urgaz bu siq — Iɣ. 7-8' },
+  { l: P.p9,        r: P.p10,       label: 'Ufellaḥ · Urgaz yemmundlen — Iɣ. 9-10' },
+  { l: P.p11,       r: P.p12,       label: 'Urgaz iɛebban · Axxam — Iɣ. 11-12' },
   { l: P.p13,       r: P.backcover, label: 'Tameggarut' },
 ];
 
 // ════════════════════════════════════════════════════
-//  FLIP ENGINE
+//  FLIP ENGINE (desktop)
 // ════════════════════════════════════════════════════
 
 let cur = 0;
@@ -749,20 +1211,17 @@ function flipForward() {
   busy = true;
   const next = cur + 1;
 
-  // Pre-load next right under the flip
   elPR.innerHTML = SPREADS[next].r;
 
-  // Set up flip element on RIGHT half
-  elFF.innerHTML = SPREADS[cur].r;     // front = current right page
-  elFB.innerHTML = SPREADS[next].l;    // back  = next left page
+  elFF.innerHTML = SPREADS[cur].r;
+  elFB.innerHTML = SPREADS[next].l;
 
   elFlip.style.display = 'block';
   elFlip.className = 'flip fright';
   elFlip.style.transform = 'rotateY(0deg)';
-  elFF.style.borderRadius = '0 6px 6px 0';
-  elFB.style.borderRadius = '6px 0 0 6px';
+  elFF.style.borderRadius = '0 7px 7px 0';
+  elFB.style.borderRadius = '7px 0 0 7px';
 
-  // Trigger
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       elFlip.classList.add('go');
@@ -790,21 +1249,17 @@ function flipBackward() {
   busy = true;
   const prev = cur - 1;
 
-  // Pre-load prev left
   elPL.innerHTML = SPREADS[prev].l;
 
-  // Set up flip element on LEFT half
-  elFF.innerHTML = SPREADS[cur].l;     // front = current left page
-  elFB.innerHTML = SPREADS[prev].r;    // back  = prev right page
+  elFF.innerHTML = SPREADS[cur].l;
+  elFB.innerHTML = SPREADS[prev].r;
 
   elFlip.style.display = 'block';
   elFlip.className = 'flip fleft';
   elFlip.style.transform = 'rotateY(0deg)';
-  elFF.style.borderRadius = '6px 0 0 6px';
-  elFB.style.borderRadius = '0 6px 6px 0';
+  elFF.style.borderRadius = '7px 0 0 7px';
+  elFB.style.borderRadius = '0 7px 7px 0';
 
-  // Pre-load prev right so it shows under when flip reaches right side
-  // We'll swap after animation
   elPR.innerHTML = SPREADS[prev].r;
 
   requestAnimationFrame(() => {
@@ -840,8 +1295,10 @@ elBN.addEventListener('click', flipForward);
 elBP.addEventListener('click', flipBackward);
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') flipForward();
-  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   flipBackward();
+  if (window.innerWidth > 768) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') flipForward();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   flipBackward();
+  }
 });
 
 // Init
@@ -954,7 +1411,7 @@ mvEl.addEventListener('touchend', e => {
   }
 }, { passive: true });
 
-// Keyboard on mobile too
+// Keyboard on mobile
 document.addEventListener('keydown', e => {
   if (window.innerWidth <= 768) {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') mNext();
@@ -962,7 +1419,7 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ─── MODE SWITCHER ────────────────────────────────────
+// ─── MODE SWITCHER ─────────────────────────────────────
 function isMob() { return window.innerWidth <= 768; }
 
 function checkMode() {
